@@ -74,3 +74,21 @@ document.getElementById('viewBtn').addEventListener('click', () => navigateTo('l
 document.getElementById('backToCreate').addEventListener('click', () => navigateTo('create'));
 window.addEventListener('hashchange', updateView);
 updateView();
+
+// Append
+async function loadJobList() {
+  const { data, error } = await supabase.from('job_cards').select('*').eq('status', 'open').order('created_at', { ascending: false });
+  if (error) alert(error.message);
+  else {
+    const list = document.getElementById('jobList');
+    list.innerHTML = '';
+    data.forEach(card => {
+      const li = document.createElement('li');
+      li.innerHTML = `${card.wo_number} - ${card.product} (${card.date})`;
+      li.addEventListener('click', () => navigateTo('view', card.id));
+      list.appendChild(li);
+    });
+  }
+}
+
+document.getElementById('backToList').addEventListener('click', () => navigateTo('list'));
