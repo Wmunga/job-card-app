@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Card System</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    section { display: none; }
+    .active { display: block; }
+    form { margin-bottom: 20px; }
+    ul { list-style: none; padding: 0; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <h1>Job Card System</h1>
+  
+  <!-- Login Section -->
+  <section id="login">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+    <p>Or <button id="signupBtn">Sign Up</button></p>
+  </section>
+  
+  <!-- Create Job Card Section -->
+  <section id="create">
+    <h2>Create Job Card</h2>
+    <form id="createForm">
+      <input type="date" id="date" required>
+      <input type="text" id="shift" placeholder="Shift (e.g., Morning)" required>
+      <input type="text" id="product" placeholder="Product" required>
+      <input type="number" id="target" placeholder="Target Quantity" required>
+      <input type="text" id="wo" placeholder="WO Number" required>
+      <button type="submit">Create</button>
+    </form>
+    <button id="viewBtn">View Job Cards</button>
+  </section>
+  
+  <!-- View Job Cards List -->
+  <section id="list">
+    <h2>Open Job Cards</h2>
+    <ul id="jobList"></ul>
+    <button id="backToCreate">Back</button>
+  </section>
+  
+  <!-- View Specific Job Card -->
+  <section id="view">
+    <h2>Job Card Details</h2>
+    <div id="cardDetails"></div>
+    <h3>Hourly Updates</h3>
+    <ul id="updatesList"></ul>
+    <form id="updateForm">
+      <input type="number" id="hour" placeholder="Hour Number" required>
+      <input type="number" id="output" placeholder="Output" required>
+      <input type="text" id="remarks" placeholder="Remarks">
+      <button type="submit">Add Update</button>
+    </form>
+    <button id="closeBtn">Close Job Card</button>
+    <button id="backToList">Back</button>
+  </section>
+</body>
+</html>
