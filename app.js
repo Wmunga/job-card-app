@@ -1,0 +1,76 @@
+const SUPABASE_URL = 'https://eoxoiyikeipminztkkpl.supabase.co'; // Replace with yours
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVveG9peWlrZWlwbWluenRra3BsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMzM5MzIsImV4cCI6MjA4NjgwOTkzMn0.lkmzO4ILu_79AzcsLam8HnxoBB87K6LySKQ0M2Wa7C4'; // Replace with yours
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentJobId = null;
+
+// Handle hash routing
+function navigateTo(section, id = null) {
+  window.location.hash = id ? `${section}:${id}` : section;
+  updateView();
+}
+
+function updateView() {
+  const hash = window.location.hash.slice(1);
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  if (!currentUser) {
+    document.getElementById('login').classList.add('active');
+    return;
+  }
+  if (hash.startsWith('view:')) {
+    currentJobId = hash.split(':')[1];
+    document.getElementById('view').classList.add('active');
+    loadJobDetails(currentJobId);
+  } else if (hash === 'list') {
+    document.getElementById('list').classList.add('active');
+    loadJobList();
+  } else {
+    document.getElementById('create').classList.add('active');
+  }
+}
+
+// Auth
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) alert(error.message);
+  else {
+    currentUser = data.user;
+    navigateTo('create');
+  }
+});
+
+document.getElementById('signupBtn').addEventListener('click', async () => {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const { error } = await supabase.auth.signUp({ email, password });
+  if (error) alert(error.message);
+  else alert('Signed up! Now log in.');
+});
+
+// Append to app.js
+document.getElementById('createForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = {
+    date: document.getElementById('date').value,
+    shift: document.getElementById('shift').value,
+    product: document.getElementById('product').value,
+    target_quantity: parseInt(document.getElementById('target').value),
+    wo_number: document.getElementById('wo').value,
+    created_by: currentUser.id
+  };
+  const { error } = await supabase.from('job_cards').insert([data]);
+  if (error) alert(error.message);
+  else {
+    alert('Job Card created!');
+    document.getElementById('createForm').reset();
+  }
+});
+
+document.getElementById('viewBtn').addEventListener('click', () => navigateTo('list'));
+document.getElementById('backToCreate').addEventListener('click', () => navigateTo('create'));
+window.addEventListener('hashchange', updateView);
+updateView();
