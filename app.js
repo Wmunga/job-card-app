@@ -92,3 +92,53 @@ async function loadJobList() {
 }
 
 document.getElementById('backToList').addEventListener('click', () => navigateTo('list'));
+
+// Append
+async function loadJobDetails(id) {
+  const { data: card } = await supabase.from('job_cards').select('*').eq('id', id).single();
+  if (card) {
+    document.getElementById('cardDetails').innerHTML = `
+      <p>WO: ${card.wo_number}</p>
+      <p>Product: ${card.product}</p>
+      <p>Target: ${card.target_quantity}</p>
+      <p>Status: ${card.status}</p>
+    `;
+  }
+  await loadUpdates(id);
+
+  // Realtime subscription
+  supabase.channel('hourly_updates').on('postgres_changes', {
+    event: 'INSERT',
+    schema: 'public',
+    table: 'hourly_updates',
+    filter: `job_card_id=eq.${id}`
+  }, () => loadUpdates(id)).subscribe();
+}
+
+async function loadUpdates(id) {
+  const { data } = await supabase.from('hourly_updates').select('*').eq('job_card_id', id).order('hour_number');
+  const list = document.getElementById('updatesList');
+  list.innerHTML = '';
+  data.forEach(update => {
+    const li = document.createElement('li');
+    li.textContent = `Hour ${update.hour_number}: Output ${update.output}, Remarks: ${update.remarks}`;
+    list.appendChild(li);
+  });
+}
+
+document.getElementById('updateForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = {
+    job_card_id: currentJobId,
+    hour_number: parseInt(document.getElementById('hour').value),
+    output: parseInt(document.getElementById('output').value),
+    remarks: document.getElementById('remarks').value
+  };
+  const { error } = await supabase.from('hourly_updates').insert([data]);
+  if (error) alert(error.message);
+  else {
+    document.getElementById('updateForm').reset();
+    loadUpdates(currentJobId); // Manual refresh, realtime handles others
+  }
+});
+
