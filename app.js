@@ -142,3 +142,12 @@ document.getElementById('updateForm').addEventListener('submit', async (e) => {
   }
 });
 
+// Append
+document.getElementById('closeBtn').addEventListener('click', async () => {
+  const { error } = await supabase.from('job_cards').update({ status: 'closed' }).eq('id', currentJobId);
+  if (error) alert(error.message);
+  else {
+    alert('Closed!');
+    navigateTo('list');
+  }
+});
